@@ -4,30 +4,85 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.whbnd.canvascompose.ui.theme.CanvasComposeTheme
+
+enum class NavigationRoute(val text: String) {
+    MAIN_MENU_ROUTE("Main Menu"),
+    SIMPLE_SHAPES_ROUTE("Simple Shapes"),
+    CLICK_GAME_ROUTE("Click Game")
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyCanvas()
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = NavigationRoute.MAIN_MENU_ROUTE.name) {
+                composable(NavigationRoute.MAIN_MENU_ROUTE.name) {
+                    OptionSelectorScreen(
+                        modifier = Modifier.padding(4.dp),
+                        options = NavigationRoute.values().map{ it.text },
+                        onOptionSelected = {
+                            var route: String = NavigationRoute.MAIN_MENU_ROUTE.name
+                            NavigationRoute.values().map { navigationRoute ->
+                                if (navigationRoute.text == it) route = navigationRoute.name
+                            }
+                            navController.navigate(route)
+                        }
+                    )
+                }
+
+                composable(NavigationRoute.SIMPLE_SHAPES_ROUTE.name) {
+                    SimpleShapesCanvas()
+                }
+
+                composable(NavigationRoute.CLICK_GAME_ROUTE.name) {
+                    ClickGameCanvas()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OptionSelectorScreen (
+    modifier: Modifier = Modifier,
+    options: List<String> = emptyList(),
+    onOptionSelected: (selectedMode: String) -> Unit = {}
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        options.forEach { option ->
+            ClickableText(
+                modifier = Modifier.padding(12.dp),
+                text = AnnotatedString(option),
+                onClick = {
+                    onOptionSelected(option)
+                }
+            )
+            if (option != options.last()) {
+                Divider()
+            }
         }
     }
 }
@@ -46,7 +101,7 @@ fun DefaultPreview() {
 }
 
 @Composable
-fun MyCanvas() {
+fun SimpleShapesCanvas() {
     Canvas(
         modifier = Modifier
             .padding(20.dp)
@@ -94,5 +149,16 @@ fun MyCanvas() {
             end = Offset(700f, 700f),
             strokeWidth = 5.dp.toPx()
         )
+    }
+}
+
+@Composable
+fun ClickGameCanvas() {
+    Text(text = NavigationRoute.CLICK_GAME_ROUTE.text)
+    Canvas(
+        modifier = Modifier
+            .padding(20.dp)
+            .size(300.dp)
+    ) {
     }
 }
