@@ -18,9 +18,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +40,8 @@ import kotlin.random.Random.Default.nextInt
 enum class NavigationRoute(val text: String) {
     MAIN_MENU_ROUTE("Main Menu"),
     SIMPLE_SHAPES_ROUTE("Simple Shapes"),
-    CLICK_GAME_ROUTE("Click Game")
+    CLICK_GAME_ROUTE("Click Game"),
+    SCALE_ROUTE("Scale")
 }
 
 class MainActivity : ComponentActivity() {
@@ -67,6 +70,10 @@ class MainActivity : ComponentActivity() {
 
                 composable(NavigationRoute.CLICK_GAME_ROUTE.name) {
                     ClickGameCanvas()
+                }
+
+                composable(NavigationRoute.SCALE_ROUTE.name) {
+                    ScaleCanvas()
                 }
             }
         }
@@ -281,4 +288,29 @@ private fun randomOffset(radius: Float, width: Int, height: Int) : Offset {
         x = nextInt(radius.roundToInt(), width - radius.roundToInt()).toFloat(),
         y = nextInt(radius.roundToInt(), height - radius.roundToInt()).toFloat()
     )
+}
+
+@Composable
+fun ScaleCanvas() {
+    var weight by remember {
+        mutableStateOf(80f)
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            text = "${weight.toInt()} Kg",
+            textAlign = TextAlign.Center
+        )
+        Scale(
+            style = ScaleStyle(scaleWidth = 150.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .align(Alignment.BottomCenter)
+        ) {
+            weight = it.toFloat()
+        }
+    }
 }
