@@ -21,8 +21,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -295,20 +298,37 @@ fun ScaleCanvas() {
     var weight by remember {
         mutableStateOf(80f)
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.Center),
-            text = "${weight.toInt()} Kg",
-            textAlign = TextAlign.Center
+                .padding(20.dp),
+            text = "Select your weight",
+            textAlign = TextAlign.Center,
+            fontSize = 30.sp
+        )
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                    .align(Alignment.Center),
+            textAlign = TextAlign.Center,
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontSize = 100.sp)) {
+                    append(weight.toInt().toString())
+                }
+                withStyle(style = SpanStyle(color = Color.Green, fontSize = 30.sp)) {
+                    append(" KG")
+                }
+            }
         )
         Scale(
             style = ScaleStyle(scaleWidth = 150.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
                 .align(Alignment.BottomCenter)
+                .height(300.dp)
         ) {
             weight = it.toFloat()
         }
