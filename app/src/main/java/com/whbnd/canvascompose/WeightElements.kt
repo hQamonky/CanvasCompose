@@ -115,6 +115,7 @@ fun Scale(
                 x = outerRadius * cos(angleInRad) + circleCenter.x,
                 y = outerRadius * sin(angleInRad) + circleCenter.y
             )
+            // Draw steps text
             drawContext.canvas.nativeCanvas.apply {
                 if (lineType is LineType.TenStep) {
                     val textRadius = outerRadius - lineLength - 5.dp.toPx() - style.textSize.toPx()
@@ -137,12 +138,14 @@ fun Scale(
                     }
                 }
             }
+            // Draw steps lines
             drawLine(
                 color = lineColor,
                 start = lineStart,
                 end = lineEnd,
                 strokeWidth = 1.dp.toPx()
             )
+            // Draw indicator
             val middleTop = Offset(
                 x = circleCenter.x,
                 y = circleCenter.y - innerRadius - style.scaleIndicatorLength.toPx()

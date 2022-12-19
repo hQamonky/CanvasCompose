@@ -1,6 +1,8 @@
 package com.whbnd.canvascompose
 
+import android.graphics.Paint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -17,7 +19,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
@@ -34,9 +38,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.whbnd.canvascompose.ui.theme.CanvasComposeTheme
 import kotlinx.coroutines.delay
-import kotlin.math.pow
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
+import kotlin.math.*
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextInt
 
@@ -44,7 +46,8 @@ enum class NavigationRoute(val text: String) {
     MAIN_MENU_ROUTE("Main Menu"),
     SIMPLE_SHAPES_ROUTE("Simple Shapes"),
     CLICK_GAME_ROUTE("Click Game"),
-    SCALE_ROUTE("Scale")
+    SCALE_ROUTE("Scale"),
+    CLOCK_ROUTE("Clock")
 }
 
 class MainActivity : ComponentActivity() {
@@ -55,8 +58,14 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = NavigationRoute.MAIN_MENU_ROUTE.name) {
                 composable(NavigationRoute.MAIN_MENU_ROUTE.name) {
                     OptionSelectorScreen(
-                        modifier = Modifier.padding(4.dp),
-                        options = NavigationRoute.values().map{ it.text },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp),
+                        options = NavigationRoute
+                            .values()
+                            .toMutableList()
+                            .subList(1, NavigationRoute.values().size)
+                            .map{ it.text },
                         onOptionSelected = {
                             var route: String = NavigationRoute.MAIN_MENU_ROUTE.name
                             NavigationRoute.values().map { navigationRoute ->
@@ -77,6 +86,10 @@ class MainActivity : ComponentActivity() {
 
                 composable(NavigationRoute.SCALE_ROUTE.name) {
                     ScaleCanvas()
+                }
+
+                composable(NavigationRoute.CLOCK_ROUTE.name) {
+                    ClockCanvas()
                 }
             }
         }
@@ -312,7 +325,7 @@ fun ScaleCanvas() {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                    .align(Alignment.Center),
+                .align(Alignment.Center),
             textAlign = TextAlign.Center,
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontSize = 100.sp)) {
@@ -331,6 +344,126 @@ fun ScaleCanvas() {
                 .height(300.dp)
         ) {
             weight = it.toFloat()
+        }
+    }
+}
+
+@Composable
+fun ClockCanvas() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        val milliseconds = remember {
+            System.currentTimeMillis()
+        }
+        var seconds by remember {
+            mutableStateOf((milliseconds / 1000f) % 60f)
+        }
+        var minutes by remember {
+            mutableStateOf(((milliseconds / 1000f) / 60) % 60f)
+        }
+        var hours by remember {
+            mutableStateOf((milliseconds / 1000f) / 3600f + 1f)
+        }
+        LaunchedEffect(key1 = seconds) {
+            delay(1000L)
+            seconds += 1f
+            minutes += 1f / 60f
+            hours += 1f / (60f * 60f * 12f)
+            Log.d("Clock", "$hours:$minutes:$seconds")
+        }
+        Clock(
+            modifier = Modifier.align(Alignment.Center),
+            hours = hours,
+            minutes = minutes,
+            seconds = seconds
+        )
+    }
+}
+
+@Composable
+fun Clock(
+    modifier: Modifier = Modifier,
+    hours: Float = 0f,
+    minutes: Float = 0f,
+    seconds: Float = 0f,
+    style: ClockStyle = ClockStyle()
+) {
+    Canvas(modifier = modifier.size(style.clockRadius * 2f)) {
+        val radius = style.clockRadius.toPx()
+        // Draw Circle
+        drawContext.canvas.nativeCanvas.apply {
+            drawCircle(
+                center.x,
+                center.y,
+                radius,
+                Paint().apply {
+                    setStyle(Paint.Style.FILL)
+                    color = style.backgroundColor
+                    setShadowLayer(
+                        60f,
+                        0f,
+                        0f,
+                        android.graphics.Color.argb(50,0,0,0)
+                    )
+                }
+            )
+        }
+        // Draw Steps
+        for (i in 0..59) {
+            val angleInRad = i * (360 / 60) * (PI / 180).toFloat()
+            val lineType = when {
+                i % 5 == 0 -> LineType.FiveStep
+                else -> LineType.Normal
+            }
+            val lineLength = when(lineType) {
+                LineType.FiveStep -> style.hourStepLength.toPx()
+                else -> style.minuteStepLength.toPx()
+            }
+            val lineColor = when(lineType) {
+                LineType.FiveStep -> style.hourStepColor
+                else -> style.minuteStepColor
+            }
+            val lineStart = Offset(
+                x = (radius - lineLength) * cos(angleInRad) + center.x,
+                y = (radius - lineLength) * sin(angleInRad) + center.y
+            )
+            val lineEnd = Offset(
+                x = radius * cos(angleInRad) + center.x,
+                y = radius * sin(angleInRad) + center.y
+            )
+            drawLine(
+                color = lineColor,
+                start = lineStart,
+                end = lineEnd,
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+        // Draw Hands
+        rotate(degrees = hours * (360f / 12f) + 180) {
+            drawLine(
+                color = style.handHoursColor,
+                start = center,
+                end = Offset(center.x, style.handHoursLength.toPx()),
+                strokeWidth = style.handHoursWidth.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
+        rotate(degrees = minutes * (360f / 60f) + 180) {
+            drawLine(
+                color = style.handMinutesColor,
+                start = center,
+                end = Offset(center.x, style.handMinutesLength.toPx()),
+                strokeWidth = style.handMinutesWidth.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
+        rotate(degrees = seconds * (360f / 60f)) {
+            drawLine(
+                color = style.handSecondsColor,
+                start = center,
+                end = Offset(center.x, style.handSecondsLength.toPx()),
+                strokeWidth = style.handSecondsWidth.toPx(),
+                cap = StrokeCap.Round
+            )
         }
     }
 }
