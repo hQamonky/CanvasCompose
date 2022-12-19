@@ -20,8 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -49,7 +48,8 @@ enum class NavigationRoute(val text: String) {
     PATH_BASICS_ROUTE("Path Basics"),
     PATH_OPERATIONS_ROUTE("Path Operations"),
     PATH_ANIMATION_ROUTE("Path Animation"),
-    PATH_ANIMATED_ARROW_ROUTE("Path Animated Arrow")
+    PATH_ANIMATED_ARROW_ROUTE("Path Animated Arrow"),
+    TRANSFORMATION_CLIPPING_ROUTE("Transformation and Clipping")
 }
 
 class MainActivity : ComponentActivity() {
@@ -89,6 +89,9 @@ class MainActivity : ComponentActivity() {
                 composable(NavigationRoute.PATH_ANIMATION_ROUTE.name) { PathAnimationCanvas() }
                 composable(NavigationRoute.PATH_ANIMATED_ARROW_ROUTE.name) {
                     PathAnimatedArrowCanvas()
+                }
+                composable(NavigationRoute.TRANSFORMATION_CLIPPING_ROUTE.name) {
+                    TransformationCanvas()
                 }
             }
         }
@@ -591,4 +594,34 @@ fun PathAnimatedArrowCanvas() {
         }
     }
 }
+
+@Composable
+fun TransformationCanvas() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        translate(left = 300f, top = 300f) {
+            rotate(45f, pivot = Offset(200f, 200f)) {
+                scale(0.5f, pivot = Offset(200f, 200f)) {
+                    val circle = Path().apply {
+                        addOval(Rect(center = Offset(400f, 400f), radius = 300f))
+                    }
+                    drawPath(
+                        path = circle,
+                        color = Color.Black,
+                        style = Stroke(width = 5.dp.toPx())
+                    )
+                    clipPath(
+                        path = circle
+                    ) {
+                        drawRect(
+                            color = Color.Red,
+                            topLeft = Offset(400f, 400f),
+                            size = Size(400f, 400f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 
