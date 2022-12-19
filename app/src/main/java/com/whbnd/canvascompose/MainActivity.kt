@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -49,7 +49,11 @@ enum class NavigationRoute(val text: String) {
     PATH_OPERATIONS_ROUTE("Path Operations"),
     PATH_ANIMATION_ROUTE("Path Animation"),
     PATH_ANIMATED_ARROW_ROUTE("Path Animated Arrow"),
-    TRANSFORMATION_CLIPPING_ROUTE("Transformation and Clipping")
+    TRANSFORMATION_CLIPPING_ROUTE("Transformation and Clipping"),
+    DASH_PATH_EFFECT_ROUTE("Dash Path Effect"),
+    CORNER_PATH_EFFECT_ROUTE("Corner Path Effect"),
+    STAMPED_PATH_EFFECT_ROUTE("Stamped Path Effect"),
+    CHAINED_PATH_EFFECT_ROUTE("Chained Path Effect")
 }
 
 class MainActivity : ComponentActivity() {
@@ -92,6 +96,16 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(NavigationRoute.TRANSFORMATION_CLIPPING_ROUTE.name) {
                     TransformationCanvas()
+                }
+                composable(NavigationRoute.DASH_PATH_EFFECT_ROUTE.name) { DashPathEffectCanvas() }
+                composable(NavigationRoute.CORNER_PATH_EFFECT_ROUTE.name) {
+                    CornerPathEffectCanvas()
+                }
+                composable(NavigationRoute.STAMPED_PATH_EFFECT_ROUTE.name) {
+                    StampedPathEffectCanvas()
+                }
+                composable(NavigationRoute.CHAINED_PATH_EFFECT_ROUTE.name) {
+                    ChainedPathEffectCanvas()
                 }
             }
         }
@@ -621,6 +635,142 @@ fun TransformationCanvas() {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DashPathEffectCanvas() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 10000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(60000, easing = LinearEasing)
+        )
+    )
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val path = Path().apply {
+            moveTo(100f, 100f)
+            cubicTo(100f,300f, 600f, 700f, 600f, 1100f)
+        }
+        drawPath(
+            path = path,
+            color = Color.Red,
+            style = Stroke(
+                width = 5.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(
+                    intervals = floatArrayOf(50f, 30f),
+                    phase = phase
+                )
+            )
+        )
+    }
+}
+
+@Composable
+fun CornerPathEffectCanvas() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 10000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(60000, easing = LinearEasing)
+        )
+    )
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val path = Path().apply {
+            moveTo(100f, 100f)
+            cubicTo(100f,300f, 600f, 700f, 600f, 1100f)
+            lineTo(800f, 800f)
+            lineTo(1000f, 1100f)
+        }
+        drawPath(
+            path = path,
+            color = Color.Red,
+            style = Stroke(
+                width = 5.dp.toPx(),
+                pathEffect = PathEffect.cornerPathEffect(
+                    radius = 1000f
+                )
+            )
+        )
+    }
+}
+
+@Composable
+fun StampedPathEffectCanvas() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 10000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(60000, easing = LinearEasing)
+        )
+    )
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val path = Path().apply {
+            moveTo(100f, 100f)
+            cubicTo(100f,300f, 600f, 700f, 600f, 1100f)
+            lineTo(800f, 800f)
+            lineTo(1000f, 1100f)
+        }
+        val oval = Path().apply {
+            addOval(Rect(topLeft = Offset.Zero, bottomRight = Offset(40f, 10f)))
+        }
+        drawPath(
+            path = path,
+            color = Color.Red,
+            style = Stroke(
+                width = 5.dp.toPx(),
+                pathEffect = PathEffect.stampedPathEffect(
+                    shape = oval,
+                    advance = 100f,
+                    phase = phase,
+                    style = StampedPathEffectStyle.Morph
+                )
+            )
+        )
+    }
+}
+
+@Composable
+fun ChainedPathEffectCanvas() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 10000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(60000, easing = LinearEasing)
+        )
+    )
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val path = Path().apply {
+            moveTo(100f, 100f)
+            cubicTo(100f,300f, 600f, 700f, 600f, 1100f)
+            lineTo(800f, 800f)
+            lineTo(1000f, 1100f)
+        }
+        val oval = Path().apply {
+            addOval(Rect(topLeft = Offset.Zero, bottomRight = Offset(40f, 10f)))
+        }
+        drawPath(
+            path = path,
+            color = Color.Red,
+            style = Stroke(
+                width = 5.dp.toPx(),
+                pathEffect = PathEffect.chainPathEffect(
+                    outer = PathEffect.stampedPathEffect(
+                        shape = oval,
+                        advance = 30f,
+                        phase = 0f,
+                        style = StampedPathEffectStyle.Rotate
+                    ),
+                    inner = PathEffect.dashPathEffect(
+                        intervals = floatArrayOf(100f, 100f)
+                    )
+                )
+            )
+        )
     }
 }
 
