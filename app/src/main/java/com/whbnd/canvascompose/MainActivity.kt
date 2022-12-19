@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -37,7 +39,6 @@ import androidx.navigation.compose.rememberNavController
 import com.whbnd.canvascompose.ui.theme.CanvasComposeTheme
 import kotlinx.coroutines.delay
 import kotlin.math.*
-import kotlin.random.Random
 import kotlin.random.Random.Default.nextInt
 
 enum class NavigationRoute(val text: String) {
@@ -47,7 +48,8 @@ enum class NavigationRoute(val text: String) {
     SCALE_ROUTE("Scale"),
     CLOCK_ROUTE("Clock"), 
     PATH_BASICS_ROUTE("Path Basics"),
-    PATH_OPERATIONS_ROUTE("Path Operations")
+    PATH_OPERATIONS_ROUTE("Path Operations"),
+    PATH_ANIMATION_ROUTE("Path Animation")
 }
 
 class MainActivity : ComponentActivity() {
@@ -98,6 +100,10 @@ class MainActivity : ComponentActivity() {
 
                 composable(NavigationRoute.PATH_OPERATIONS_ROUTE.name) {
                     PathOperationsCanvas()
+                }
+
+                composable(NavigationRoute.PATH_ANIMATION_ROUTE.name) {
+                    PathAnimationCanvas()
                 }
             }
         }
@@ -515,5 +521,36 @@ fun PathOperationsCanvas() {
         drawPath(path = squareWithoutOp, color = Color.Red, style = Stroke(width = 2.dp.toPx()))
         drawPath(path = circle, color = Color.Blue, style = Stroke(width = 2.dp.toPx()))
         drawPath(path = pathWithOp, color = Color.Green)
+    }
+}
+
+@Composable
+fun PathAnimationCanvas() {
+    val pathPortion = remember {
+        androidx.compose.animation.core.Animatable(initialValue = 0f)
+    }
+    LaunchedEffect(key1 = true) {
+        pathPortion.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 5000
+            )
+        )
+    }
+    val path = Path().apply {
+        moveTo(100f, 100f)
+        quadraticBezierTo(400f, 400f, 100f, 400f)
+    }
+    val outPath = Path()
+    PathMeasure().apply {
+        setPath(path, false)
+        getSegment(0f, pathPortion.value * length, outPath)
+    }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawPath(
+            path = outPath,
+            color = Color.Red,
+            style = Stroke(width = 5.dp.toPx())
+        )
     }
 }
