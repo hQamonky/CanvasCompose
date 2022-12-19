@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -45,7 +46,8 @@ enum class NavigationRoute(val text: String) {
     CLICK_GAME_ROUTE("Click Game"),
     SCALE_ROUTE("Scale"),
     CLOCK_ROUTE("Clock"), 
-    PATH_BASICS_ROUTE("Path Basics")
+    PATH_BASICS_ROUTE("Path Basics"),
+    PATH_OPERATIONS_ROUTE("Path Operations")
 }
 
 class MainActivity : ComponentActivity() {
@@ -92,6 +94,10 @@ class MainActivity : ComponentActivity() {
 
                 composable(NavigationRoute.PATH_BASICS_ROUTE.name) {
                     PathBasicsCanvas()
+                }
+
+                composable(NavigationRoute.PATH_OPERATIONS_ROUTE.name) {
+                    PathOperationsCanvas()
                 }
             }
         }
@@ -491,5 +497,23 @@ fun PathBasicsCanvas() {
                 miter = 0f
             )
         )
+    }
+}
+
+@Composable
+fun PathOperationsCanvas() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val squareWithoutOp = Path().apply {
+            addRect(Rect(Offset(200f,200f), Size(200f, 200f)))
+        }
+        val circle = Path().apply {
+            addOval(Rect(Offset(200f, 200f), 100f))
+        }
+        val pathWithOp = Path().apply {
+            op(squareWithoutOp, circle, PathOperation.Difference)
+        }
+        drawPath(path = squareWithoutOp, color = Color.Red, style = Stroke(width = 2.dp.toPx()))
+        drawPath(path = circle, color = Color.Blue, style = Stroke(width = 2.dp.toPx()))
+        drawPath(path = pathWithOp, color = Color.Green)
     }
 }
