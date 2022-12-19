@@ -53,7 +53,8 @@ enum class NavigationRoute(val text: String) {
     DASH_PATH_EFFECT_ROUTE("Dash Path Effect"),
     CORNER_PATH_EFFECT_ROUTE("Corner Path Effect"),
     STAMPED_PATH_EFFECT_ROUTE("Stamped Path Effect"),
-    CHAINED_PATH_EFFECT_ROUTE("Chained Path Effect")
+    CHAINED_PATH_EFFECT_ROUTE("Chained Path Effect"),
+    TEXT_ON_PATH_ROUTE("Text on Path")
 }
 
 class MainActivity : ComponentActivity() {
@@ -107,6 +108,7 @@ class MainActivity : ComponentActivity() {
                 composable(NavigationRoute.CHAINED_PATH_EFFECT_ROUTE.name) {
                     ChainedPathEffectCanvas()
                 }
+                composable(NavigationRoute.TEXT_ON_PATH_ROUTE.name) { TextOnPathCanvas() }
             }
         }
     }
@@ -669,14 +671,6 @@ fun DashPathEffectCanvas() {
 
 @Composable
 fun CornerPathEffectCanvas() {
-    val infiniteTransition = rememberInfiniteTransition()
-    val phase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 10000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(60000, easing = LinearEasing)
-        )
-    )
     Canvas(modifier = Modifier.fillMaxSize()) {
         val path = Path().apply {
             moveTo(100f, 100f)
@@ -735,14 +729,6 @@ fun StampedPathEffectCanvas() {
 
 @Composable
 fun ChainedPathEffectCanvas() {
-    val infiniteTransition = rememberInfiniteTransition()
-    val phase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 10000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(60000, easing = LinearEasing)
-        )
-    )
     Canvas(modifier = Modifier.fillMaxSize()) {
         val path = Path().apply {
             moveTo(100f, 100f)
@@ -771,6 +757,29 @@ fun ChainedPathEffectCanvas() {
                 )
             )
         )
+    }
+}
+
+@Composable
+fun TextOnPathCanvas() {
+    val path = android.graphics.Path().apply {
+        moveTo(200f, 800f)
+        quadTo(600f, 400f, 1000f, 800f)
+    }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawContext.canvas.nativeCanvas.apply {
+            drawTextOnPath(
+                "Hello World",
+                path,
+                30f,
+                50f,
+                Paint().apply {
+                    color = android.graphics.Color.RED
+                    textSize = 70f
+                    textAlign = Paint.Align.CENTER
+                }
+            )
+        }
     }
 }
 
