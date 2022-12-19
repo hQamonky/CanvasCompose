@@ -17,12 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -47,7 +44,8 @@ enum class NavigationRoute(val text: String) {
     SIMPLE_SHAPES_ROUTE("Simple Shapes"),
     CLICK_GAME_ROUTE("Click Game"),
     SCALE_ROUTE("Scale"),
-    CLOCK_ROUTE("Clock")
+    CLOCK_ROUTE("Clock"), 
+    PATH_BASICS_ROUTE("Path Basics")
 }
 
 class MainActivity : ComponentActivity() {
@@ -90,6 +88,10 @@ class MainActivity : ComponentActivity() {
 
                 composable(NavigationRoute.CLOCK_ROUTE.name) {
                     ClockCanvas()
+                }
+
+                composable(NavigationRoute.PATH_BASICS_ROUTE.name) {
+                    PathBasicsCanvas()
                 }
             }
         }
@@ -465,5 +467,29 @@ fun Clock(
                 cap = StrokeCap.Round
             )
         }
+    }
+}
+
+@Composable
+fun PathBasicsCanvas() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val path = Path().apply {
+            moveTo(1000f, 100f)
+            lineTo(100f, 500f)
+            lineTo(500f, 500f)
+//            quadraticBezierTo(800f, 300f, 500f, 100f)
+            cubicTo(800f, 500f, 800f, 100f, 500f, 100f)
+//            lineTo(100f,100f)
+        }
+        drawPath(
+            path = path,
+            color = Color.Red,
+            style = Stroke(
+                width = 10.dp.toPx(),
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Miter,
+                miter = 0f
+            )
+        )
     }
 }
