@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -49,7 +48,8 @@ enum class NavigationRoute(val text: String) {
     CLOCK_ROUTE("Clock"), 
     PATH_BASICS_ROUTE("Path Basics"),
     PATH_OPERATIONS_ROUTE("Path Operations"),
-    PATH_ANIMATION_ROUTE("Path Animation")
+    PATH_ANIMATION_ROUTE("Path Animation"),
+    PATH_ANIMATED_ARROW_ROUTE("Path Animated Arrow")
 }
 
 class MainActivity : ComponentActivity() {
@@ -57,7 +57,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = NavigationRoute.MAIN_MENU_ROUTE.name) {
+            NavHost(
+                navController = navController,
+                startDestination = NavigationRoute.MAIN_MENU_ROUTE.name
+            ) {
                 composable(NavigationRoute.MAIN_MENU_ROUTE.name) {
                     OptionSelectorScreen(
                         modifier = Modifier
@@ -77,33 +80,15 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-
-                composable(NavigationRoute.SIMPLE_SHAPES_ROUTE.name) {
-                    SimpleShapesCanvas()
-                }
-
-                composable(NavigationRoute.CLICK_GAME_ROUTE.name) {
-                    ClickGameCanvas()
-                }
-
-                composable(NavigationRoute.SCALE_ROUTE.name) {
-                    ScaleCanvas()
-                }
-
-                composable(NavigationRoute.CLOCK_ROUTE.name) {
-                    ClockCanvas()
-                }
-
-                composable(NavigationRoute.PATH_BASICS_ROUTE.name) {
-                    PathBasicsCanvas()
-                }
-
-                composable(NavigationRoute.PATH_OPERATIONS_ROUTE.name) {
-                    PathOperationsCanvas()
-                }
-
-                composable(NavigationRoute.PATH_ANIMATION_ROUTE.name) {
-                    PathAnimationCanvas()
+                composable(NavigationRoute.SIMPLE_SHAPES_ROUTE.name) { SimpleShapesCanvas() }
+                composable(NavigationRoute.CLICK_GAME_ROUTE.name) { ClickGameCanvas() }
+                composable(NavigationRoute.SCALE_ROUTE.name) { ScaleCanvas() }
+                composable(NavigationRoute.CLOCK_ROUTE.name) {ClockCanvas() }
+                composable(NavigationRoute.PATH_BASICS_ROUTE.name) { PathBasicsCanvas() }
+                composable(NavigationRoute.PATH_OPERATIONS_ROUTE.name) { PathOperationsCanvas() }
+                composable(NavigationRoute.PATH_ANIMATION_ROUTE.name) { PathAnimationCanvas() }
+                composable(NavigationRoute.PATH_ANIMATED_ARROW_ROUTE.name) {
+                    PathAnimatedArrowCanvas()
                 }
             }
         }
@@ -539,7 +524,7 @@ fun PathAnimationCanvas() {
     }
     val path = Path().apply {
         moveTo(100f, 100f)
-        quadraticBezierTo(400f, 400f, 100f, 400f)
+        quadraticBezierTo(100f, 400f, 400f, 400f)
     }
     val outPath = Path()
     PathMeasure().apply {
@@ -554,3 +539,56 @@ fun PathAnimationCanvas() {
         )
     }
 }
+
+@Composable
+fun PathAnimatedArrowCanvas() {
+    val pathPortion = remember {
+        androidx.compose.animation.core.Animatable(initialValue = 0f)
+    }
+    LaunchedEffect(key1 = true) {
+        pathPortion.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 5000
+            )
+        )
+    }
+    val path = Path().apply {
+        moveTo(100f, 100f)
+        quadraticBezierTo(100f, 400f, 400f, 400f)
+    }
+    val outPath = android.graphics.Path()
+    val pos = FloatArray(2)
+    val tan = FloatArray(2)
+    android.graphics.PathMeasure().apply {
+        setPath(path.asAndroidPath(), false)
+        getSegment(0f, pathPortion.value * length, outPath, true)
+        getPosTan(
+            pathPortion.value * length,
+            pos,
+            tan
+        )
+    }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawPath(
+            path = outPath.asComposePath(),
+            color = Color.Red,
+            style = Stroke(width = 5.dp.toPx())
+        )
+        val x = pos[0]
+        val y = pos[1]
+        val degrees = -atan2(tan[0], tan[1]) * (180f / PI.toFloat()) - 180f
+        rotate(degrees = degrees, pivot = Offset(x, y)) {
+            drawPath(
+                path = Path().apply {
+                    moveTo(x, y - 30f)
+                    lineTo(x - 30f, y +60f)
+                    lineTo(x + 30f, y + 60f)
+                    close()
+                },
+                color = Color.Red
+            )
+        }
+    }
+}
+
