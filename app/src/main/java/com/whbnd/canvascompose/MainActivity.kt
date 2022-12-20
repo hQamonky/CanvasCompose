@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.whbnd.canvascompose.genderpicker.Gender
+import com.whbnd.canvascompose.genderpicker.GenderPicker
 import com.whbnd.canvascompose.ui.theme.CanvasComposeTheme
 import kotlinx.coroutines.delay
 import kotlin.math.*
@@ -54,7 +56,8 @@ enum class NavigationRoute(val text: String) {
     CORNER_PATH_EFFECT_ROUTE("Corner Path Effect"),
     STAMPED_PATH_EFFECT_ROUTE("Stamped Path Effect"),
     CHAINED_PATH_EFFECT_ROUTE("Chained Path Effect"),
-    TEXT_ON_PATH_ROUTE("Text on Path")
+    TEXT_ON_PATH_ROUTE("Text on Path"),
+    GENDER_PICKER_ROUTE("Gender Picker")
 }
 
 class MainActivity : ComponentActivity() {
@@ -109,6 +112,15 @@ class MainActivity : ComponentActivity() {
                     ChainedPathEffectCanvas()
                 }
                 composable(NavigationRoute.TEXT_ON_PATH_ROUTE.name) { TextOnPathCanvas() }
+                composable(NavigationRoute.GENDER_PICKER_ROUTE.name) {
+                    GenderPicker(Modifier.fillMaxSize()) {
+                        // Gender selected
+                        if (it is Gender.Male)
+                            Log.i("MainActivity", "Selected male gender")
+                        else if (it is Gender.Female)
+                            Log.i("MainActivity", "Selected female gender")
+                    }
+                }
             }
         }
     }
@@ -531,7 +543,7 @@ fun PathOperationsCanvas() {
 @Composable
 fun PathAnimationCanvas() {
     val pathPortion = remember {
-        androidx.compose.animation.core.Animatable(initialValue = 0f)
+        Animatable(initialValue = 0f)
     }
     LaunchedEffect(key1 = true) {
         pathPortion.animateTo(
@@ -562,7 +574,7 @@ fun PathAnimationCanvas() {
 @Composable
 fun PathAnimatedArrowCanvas() {
     val pathPortion = remember {
-        androidx.compose.animation.core.Animatable(initialValue = 0f)
+        Animatable(initialValue = 0f)
     }
     LaunchedEffect(key1 = true) {
         pathPortion.animateTo(
