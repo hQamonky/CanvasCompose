@@ -34,8 +34,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.whbnd.canvascompose.clock.ClockStyle
 import com.whbnd.canvascompose.genderpicker.Gender
 import com.whbnd.canvascompose.genderpicker.GenderPicker
+import com.whbnd.canvascompose.scale.Scale
+import com.whbnd.canvascompose.scale.ScaleStyle
 import com.whbnd.canvascompose.ui.theme.CanvasComposeTheme
 import kotlinx.coroutines.delay
 import kotlin.math.*

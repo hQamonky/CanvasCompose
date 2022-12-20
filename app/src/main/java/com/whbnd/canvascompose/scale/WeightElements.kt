@@ -1,4 +1,4 @@
-package com.whbnd.canvascompose
+package com.whbnd.canvascompose.scale
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.withRotation
+import com.whbnd.canvascompose.LineType
 import kotlin.math.*
 
 @Composable

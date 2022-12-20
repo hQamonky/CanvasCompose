@@ -1,4 +1,4 @@
-package com.whbnd.canvascompose
+package com.whbnd.canvascompose.clock
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp

@@ -1,4 +1,4 @@
-package com.whbnd.canvascompose
+package com.whbnd.canvascompose.scale
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
